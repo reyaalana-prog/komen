@@ -24,10 +24,30 @@ export default function Player() {
     };
     checkAdBlock();
 
-    // 2. AMBIL JUDUL VIDEO SAJA (Tanpa simpan stats)
+    // 2. AMBIL JUDUL VIDEO DARI MULTI-TABLE (videos2 & videos1)
     const fetchVideoInfo = async () => {
-      const { data } = await supabase.from('videos1').select('title').eq('videy_id', id).single();
-      if (data) document.title = data.title;
+      // Cek di tabel baru dulu (videos2)
+      let { data, error } = await supabase
+        .from('videos2')
+        .select('title')
+        .eq('videy_id', id)
+        .single();
+      
+      // Jika tidak ada di videos2, cari di tabel lama (videos1)
+      if (!data) {
+        const { data: oldData } = await supabase
+          .from('videos1')
+          .select('title')
+          .eq('videy_id', id)
+          .single();
+        data = oldData;
+      }
+
+      if (data) {
+        document.title = data.title;
+      } else {
+        document.title = "Video Player";
+      }
     };
     
     fetchVideoInfo();
@@ -52,7 +72,6 @@ export default function Player() {
       const randomIndex = Math.floor(Math.random() * affiliateLinks.length);
       window.open(affiliateLinks[randomIndex], '_blank');
     } else {
-      // PERBAIKAN: Menggunakan cdn2 untuk download
       window.location.href = `https://cdn2.videy.co/${id}.mp4`;
       localStorage.setItem('download_step', '0');
     }
@@ -74,6 +93,7 @@ export default function Player() {
         }
       `}</style>
 
+      {/* Script Iklan Popunder Utama */}
       <Script src="https://pl28763278.effectivegatecpm.com/ee/04/09/ee040951564d0118f9c97849ba692abb.js" strategy="afterInteractive" />
 
       {adBlockDetected && (
@@ -113,7 +133,6 @@ export default function Player() {
             preload="metadata"
             playsInline
           >
-            {/* PERBAIKAN: Menggunakan cdn2 untuk player */}
             <source src={`https://cdn2.videy.co/${id}.mp4`} type="video/mp4" />
           </video>
         </div>
