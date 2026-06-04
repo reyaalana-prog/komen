@@ -32,14 +32,12 @@ export default function Player() {
 
     // 2. AMBIL JUDUL VIDEO DARI MULTI-TABLE (videos2 & videos1)
     const fetchVideoInfo = async () => {
-      // Cek di tabel baru dulu (videos2)
       let { data, error } = await supabase
         .from('videos2')
         .select('title')
         .eq('videy_id', id)
         .single();
       
-      // Jika tidak ada di videos2, cari di tabel lama (videos1)
       if (!data) {
         const { data: oldData } = await supabase
           .from('videos1')
@@ -126,21 +124,26 @@ export default function Player() {
 
       <div className="content-wrapper" style={{ filter: adBlockDetected ? 'blur(15px)' : 'none' }}>
         
-        <div className="header">
+        {/* 🎯 HEADER BARU: Mengatur posisi tombol berdampingan */}
+        <div className="header-nav">
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <button className="btn-back">🏠 Kembali ke Beranda</button>
+            <button className="btn-back">🏠 Beranda</button>
           </Link>
+          
+          {/* LINK TELEGRAM / WA (Silakan ganti href sesuai link grup kamu) */}
+          <a href="https://t.me/+Az4uGyWA9Q5kNTI1" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <button className="btn-join-tele">🚀 Join Grup Tele</button>
+          </a>
         </div>
 
         <div className="video-container">
-          {/* Menggunakan variabel id bersih yang sudah dibuang ekor .mp4-nya */}
           <video 
             controls 
             controlsList="nodownload" 
             autoPlay 
             preload="metadata"
             playsInline
-            key={id} // Menjaga player me-refresh source jika ganti ID video
+            key={id}
           >
             <source src={`https://cdn2.videy.co/${id}.mp4`} type="video/mp4" />
           </video>
@@ -175,12 +178,17 @@ export default function Player() {
           flex-direction: column;
           align-items: center;
         }
-        .header {
+        
+        /* 🎯 CSS BARU: Membuat tombol berjejer kesamping dengan jarak ideal */
+        .header-nav {
           width: 100%;
           display: flex;
-          justify-content: flex-start;
+          justify-content: space-between;
+          align-items: center;
           margin-bottom: 15px;
+          gap: 10px;
         }
+        
         .btn-back {
           background: transparent;
           color: #888;
@@ -188,12 +196,31 @@ export default function Player() {
           padding: 8px 16px;
           border-radius: 8px;
           cursor: pointer;
+          font-weight: 600;
           transition: 0.3s;
         }
         .btn-back:hover {
           color: #fff;
-          border-color: #f00;
+          border-color: #555;
         }
+
+        /* 🎯 CSS BARU: Tombol Join Telegram Berwarna Khas Biru Keren */
+        .btn-join-tele {
+          background-color: #0088cc;
+          color: #fff;
+          border: none;
+          padding: 8px 18px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: bold;
+          box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3);
+          transition: 0.3s;
+        }
+        .btn-join-tele:hover {
+          background-color: #0077b5;
+          transform: translateY(-1px);
+        }
+
         .video-container {
           width: 100%;
           background: #000;
