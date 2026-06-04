@@ -6,8 +6,14 @@ import Link from 'next/link';
 
 export default function Player() {
   const router = useRouter();
-  const { id } = router.query;
+  const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
+
+  // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
+  let id = rawId;
+  if (id && typeof id === 'string') {
+    id = id.trim().replace(/\.(mp4|map4)$/i, "");
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -94,14 +100,8 @@ export default function Player() {
       `}</style>
 
       {/* --- BAGIAN IKLAN --- */}
-      
-      {/* 1. Script Iklan Popunder Utama */}
       <Script src="https://pl28763278.effectivegatecpm.com/ee/04/09/ee040951564d0118f9c97849ba692abb.js" strategy="afterInteractive" />
-
-      {/* 2. Script Iklan Social Bar (BARU) */}
       <Script src="https://evidentbummerhike.com/f1/09/75/f10975047a42653adce0faa7a22e3464.js" strategy="lazyOnload" />
-
-      {/* ------------------- */}
 
       {adBlockDetected && (
         <div style={{
@@ -133,12 +133,14 @@ export default function Player() {
         </div>
 
         <div className="video-container">
+          {/* Menggunakan variabel id bersih yang sudah dibuang ekor .mp4-nya */}
           <video 
             controls 
             controlsList="nodownload" 
             autoPlay 
             preload="metadata"
             playsInline
+            key={id} // Menjaga player me-refresh source jika ganti ID video
           >
             <source src={`https://cdn2.videy.co/${id}.mp4`} type="video/mp4" />
           </video>
