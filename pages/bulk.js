@@ -14,8 +14,8 @@ export default function BulkShare() {
 
   // 🎯 TAHAP 1: AMANKAN DAFTAR DOMAIN BIAR LOLOS BUILD NEXT.JS
   const [daftarDomain, setDaftarDomain] = useState([
-    { nama: 'Domain Utama (cdnviduy.site)', url: 'https://cdnviduy.site' },
-    { nama: 'cdn2.viduy.icu', url: 'https://cdn2.viduy.icu' },
+    { nama: 'Domain Utama (cloudflare)', url: 'https://2dbsclbarfire.pages.dev' },
+    { nama: 'slicednive.site', url: 'https://slicednive.site' },
     { nama: 'viduy.icu', url: 'https://viduy.icu' },
     { nama: 'Vercel / Pages Cadangan', url: 'https://cdnviduy.site' } // Nilai sementara sebelum browser siap
   ]);
