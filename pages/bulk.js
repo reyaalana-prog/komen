@@ -25,7 +25,7 @@ export default function BulkShare() {
     if (typeof window !== 'undefined') {
       const domainRealTime = [
         { nama: 'Domain Utama (cloudflare)', url: 'https://2dbsclbarfire.pages.dev' },
-        { nama: 'slicidrive.site', url: 'https://slicidrive.site' },
+        { nama: 'slicednive.site', url: 'https://slicednive.site' },
         { nama: 'viduy.icu', url: 'https://viduy.icu' },
         { nama: 'Vercel / Pages Cadangan', url: window.location.origin }
       ];
