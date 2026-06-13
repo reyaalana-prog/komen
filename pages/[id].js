@@ -64,7 +64,9 @@ export default function Player() {
 
   const handleDownload = () => {
     let currentStep = parseInt(localStorage.getItem('download_step') || '0');
-    const linkAdstera = 'https://www.effectivegatecpm.com/u88ksn21bi?key=466e5edc4b150634636ec85f6be789c3';
+    
+    // 🎯 UPDATE: Direct Link Baru dari Adsterra
+    const linkAdstera = 'https://researchingsweatexit.com/qbd728qj?key=843109ad1c064b8f2240ccaa317b3e02';
     const affiliateLinks = ['https://s.shopee.co.id/7fUZHYXISz', 'https://s.shopee.co.id/AUokejQPcI'];
 
     currentStep++;
@@ -97,9 +99,11 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- BAGIAN IKLAN --- */}
-      <Script src="https://pl28763278.effectivegatecpm.com/ee/04/09/ee040951564d0118f9c97849ba692abb.js" strategy="afterInteractive" />
-      <Script src="https://evidentbummerhike.com/f1/09/75/f10975047a42653adce0faa7a22e3464.js" strategy="lazyOnload" />
+      {/* --- 🎯 UPDATE: BAGIAN IKLAN POPUNDER BARU (CUMA 1 SKRIP BIAR GA DOBEL) --- */}
+      <Script 
+        src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" 
+        strategy="afterInteractive" 
+      />
 
       {adBlockDetected && (
         <div style={{
@@ -111,7 +115,7 @@ export default function Player() {
           <div style={{ fontSize: '4rem', marginBottom: '10px' }}>⚠️</div>
           <h2 style={{ fontFamily: 'sans-serif' }}>Adblock Terdeteksi!</h2>
           <p style={{ color: '#ccc', maxWidth: '400px', lineHeight: '1.6' }}>
-            Harap **matikan Adblock** agar kami bisa terus menyediakan layanan gratis.
+            Harap <b>matikan Adblock</b> agar kami bisa terus menyediakan layanan gratis.
           </p>
           <button 
             onClick={() => window.location.reload()}
@@ -124,13 +128,11 @@ export default function Player() {
 
       <div className="content-wrapper" style={{ filter: adBlockDetected ? 'blur(15px)' : 'none' }}>
         
-        {/* 🎯 HEADER BARU: Mengatur posisi tombol berdampingan */}
         <div className="header-nav">
           <Link href="/" style={{ textDecoration: 'none' }}>
             <button className="btn-back">🏠 Beranda</button>
           </Link>
           
-          {/* LINK TELEGRAM / WA (Silakan ganti href sesuai link grup kamu) */}
           <a href="https://t.me/+Az4uGyWA9Q5kNTI1" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
             <button className="btn-join-tele">🚀 Join Grup Tele</button>
           </a>
@@ -178,8 +180,6 @@ export default function Player() {
           flex-direction: column;
           align-items: center;
         }
-        
-        /* 🎯 CSS BARU: Membuat tombol berjejer kesamping dengan jarak ideal */
         .header-nav {
           width: 100%;
           display: flex;
@@ -188,7 +188,6 @@ export default function Player() {
           margin-bottom: 15px;
           gap: 10px;
         }
-        
         .btn-back {
           background: transparent;
           color: #888;
@@ -203,8 +202,6 @@ export default function Player() {
           color: #fff;
           border-color: #555;
         }
-
-        /* 🎯 CSS BARU: Tombol Join Telegram Berwarna Khas Biru Keren */
         .btn-join-tele {
           background-color: #0088cc;
           color: #fff;
@@ -220,7 +217,6 @@ export default function Player() {
           background-color: #0077b5;
           transform: translateY(-1px);
         }
-
         .video-container {
           width: 100%;
           background: #000;
