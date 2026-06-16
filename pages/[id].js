@@ -19,15 +19,20 @@ export default function Player() {
   useEffect(() => {
     if (!id) return;
 
-    // 🎯 RALAT: SISTEM ROTASI HANYA 2 POPUNDER (Adsterra ⇄ PopCash)
+    // 🎯 FIX: ROTASI AKURAT & ANTI DOUBLE-TRIGGER
+    // Ambil giliran saat ini
     const currentTurn = localStorage.getItem('popunder_turn') || 'adsterra';
+    
+    // Set state berdasarkan giliran saat ini secara langsung
     if (currentTurn === 'adsterra') {
       setUsePopCash(false);
-      localStorage.setItem('popunder_turn', 'popcash'); // Giliran berikutnya PopCash
     } else {
       setUsePopCash(true);
-      localStorage.setItem('popunder_turn', 'adsterra'); // Giliran berikutnya Adsterra
     }
+
+    // Ganti giliran di localStorage untuk kunjungan halaman berikutnya
+    const nextTurn = currentTurn === 'adsterra' ? 'popcash' : 'adsterra';
+    localStorage.setItem('popunder_turn', nextTurn);
 
     // 1. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
@@ -194,104 +199,19 @@ export default function Player() {
       </div>
 
       <style jsx>{`
-        .player-page {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
-          width: 100%;
-          background-color: #000;
-        }
-        .content-wrapper {
-          width: 100%;
-          max-width: 850px;
-          padding: 20px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-        .header-nav {
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 15px;
-          gap: 10px;
-        }
-        .btn-back {
-          background: transparent;
-          color: #888;
-          border: 1px solid #333;
-          padding: 8px 16px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: 0.3s;
-        }
-        .btn-back:hover {
-          color: #fff;
-          border-color: #555;
-        }
-        .btn-join-tele {
-          background-color: #0088cc;
-          color: #fff;
-          border: none;
-          padding: 8px 18px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: bold;
-          box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3);
-          transition: 0.3s;
-        }
-        .btn-join-tele:hover {
-          background-color: #0077b5;
-          transform: translateY(-1px);
-        }
-        .video-container {
-          width: 100%;
-          background: #000;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 10px 40px rgba(255, 0, 0, 0.1);
-          line-height: 0;
-        }
-        video {
-          width: 100%;
-          height: auto;
-          max-height: 75vh;
-          background: #000;
-        }
-        .actions {
-          margin-top: 30px;
-          text-align: center;
-          width: 100%;
-        }
-        .btn-download {
-          padding: 18px 40px;
-          font-size: 1.1rem;
-          background-color: #28a745;
-          color: #fff;
-          border: none;
-          border-radius: 50px;
-          font-weight: bold;
-          cursor: pointer;
-          width: 100%;
-          max-width: 400px;
-          box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-          transition: 0.3s;
-        }
-        .btn-download:hover {
-          transform: scale(1.05);
-          background-color: #218838;
-        }
-        .link-more {
-          display: block;
-          margin-top: 20px;
-          color: #666;
-          text-decoration: underline;
-          cursor: pointer;
-          font-size: 0.9rem;
-        }
+        .player-page { display: flex; justify-content: center; align-items: center; min-height: 100vh; width: 100%; background-color: #000; }
+        .content-wrapper { width: 100%; max-width: 850px; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header-nav { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
+        .btn-back { background: transparent; color: #888; border: 1px solid #333; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-back:hover { color: #fff; border-color: #555; }
+        .btn-join-tele { background-color: #0088cc; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3); transition: 0.3s; }
+        .btn-join-tele:hover { background-color: #0077b5; transform: translateY(-1px); }
+        .video-container { width: 100%; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(255, 0, 0, 0.1); line-height: 0; }
+        video { width: 100%; height: auto; max-height: 75vh; background: #000; }
+        .actions { margin-top: 30px; text-align: center; width: 100%; }
+        .btn-download { padding: 18px 40px; font-size: 1.1rem; background-color: #28a745; color: #fff; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; max-width: 400px; box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4); transition: 0.3s; }
+        .btn-download:hover { transform: scale(1.05); background-color: #218838; }
+        .link-more { display: block; margin-top: 20px; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.9rem; }
       `}</style>
     </div>
   );
