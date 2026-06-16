@@ -116,7 +116,7 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🎯 FIX UTAMA: SOCIAL BAR DI-LOAD PALING PERTAMA (Biar Gak Ditindas PopCash) --- */}
+      {/* --- 🎯 SOCIAL BAR DI-LOAD PALING PERTAMA (Biar Gak Ditindas PopCash) --- */}
       <Script 
         src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" 
         strategy="beforeInteractive" 
@@ -130,13 +130,21 @@ export default function Player() {
           strategy="afterInteractive" 
         />
       ) : (
-        // JIKA GILIRAN POPCASH
-        <Script id="popcash-script" strategy="lazyOnload">
+        // JIKA GILIRAN POPCASH (Fix: Menggunakan Timeout 1,5 Detik agar Social Bar Aman)
+        <Script id="popcash-script" strategy="afterInteractive">
           {`
-            var uid = '502785';
-            var wid = '755160';
-            var pop_tag = document.createElement('script');pop_tag.src='//cdn.popcash.net/show.js';document.body.appendChild(pop_tag);
-            pop_tag.onerror = function() {pop_tag = document.createElement('script');pop_tag.src='//cdn2.popcash.net/show.js';document.body.appendChild(pop_tag);};
+            setTimeout(function() {
+              var uid = '502785';
+              var wid = '755160';
+              var pop_tag = document.createElement('script');
+              pop_tag.src='//cdn.popcash.net/show.js';
+              document.body.appendChild(pop_tag);
+              pop_tag.onerror = function() {
+                var pop_tag2 = document.createElement('script');
+                pop_tag2.src='//cdn2.popcash.net/show.js';
+                document.body.appendChild(pop_tag2);
+              };
+            }, 1500);
           `}
         </Script>
       )}
