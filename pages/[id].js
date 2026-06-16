@@ -8,6 +8,7 @@ export default function Player() {
   const router = useRouter();
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
+  const [usePopCash, setUsePopCash] = useState(false);
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
   let id = rawId;
@@ -17,6 +18,16 @@ export default function Player() {
 
   useEffect(() => {
     if (!id) return;
+
+    // 🎯 RALAT: SISTEM ROTASI HANYA 2 POPUNDER (Adsterra ⇄ PopCash)
+    const currentTurn = localStorage.getItem('popunder_turn') || 'adsterra';
+    if (currentTurn === 'adsterra') {
+      setUsePopCash(false);
+      localStorage.setItem('popunder_turn', 'popcash'); // Giliran berikutnya PopCash
+    } else {
+      setUsePopCash(true);
+      localStorage.setItem('popunder_turn', 'adsterra'); // Giliran berikutnya Adsterra
+    }
 
     // 1. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
@@ -65,7 +76,7 @@ export default function Player() {
   const handleDownload = () => {
     let currentStep = parseInt(localStorage.getItem('download_step') || '0');
     
-    // 🎯 UPDATE: Direct Link Baru dari Adsterra
+    // 🎯 Direct Link Baru dari Adsterra
     const linkAdstera = 'https://researchingsweatexit.com/qbd728qj?key=843109ad1c064b8f2240ccaa317b3e02';
     const affiliateLinks = ['https://s.shopee.co.id/7fUZHYXISz', 'https://s.shopee.co.id/AUokejQPcI'];
 
@@ -99,17 +110,30 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🎯 BAGIAN IKLAN POPUNDER --- */}
-      <Script 
-        src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" 
-        strategy="afterInteractive" 
-      />
-
-      {/* --- 🎯 UPDATE: BARIS SKRIP SOCIAL BAR BARU KAMU --- */}
+      {/* --- 🎯 IKLAN SOCIAL BAR ADSTERRA --- */}
       <Script 
         src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" 
         strategy="afterInteractive" 
       />
+
+      {/* --- 🎯 EKSEKUSI ROTASI 2 POPUNDER --- */}
+      {!usePopCash ? (
+        // JIKA GILIRAN ADSTERRA
+        <Script 
+          src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" 
+          strategy="afterInteractive" 
+        />
+      ) : (
+        // JIKA GILIRAN POPCASH
+        <Script id="popcash-script" strategy="afterInteractive">
+          {`
+            var uid = '502785';
+            var wid = '755160';
+            var pop_tag = document.createElement('script');pop_tag.src='//cdn.popcash.net/show.js';document.body.appendChild(pop_tag);
+            pop_tag.onerror = function() {pop_tag = document.createElement('script');pop_tag.src='//cdn2.popcash.net/show.js';document.body.appendChild(pop_tag);};
+          `}
+        </Script>
+      )}
 
       {adBlockDetected && (
         <div style={{
