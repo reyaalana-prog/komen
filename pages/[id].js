@@ -9,6 +9,7 @@ export default function Player() {
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
   const [usePopCash, setUsePopCash] = useState(false);
+  const [randomSeed, setRandomSeed] = useState('');
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
   let id = rawId;
@@ -19,18 +20,17 @@ export default function Player() {
   useEffect(() => {
     if (!id) return;
 
-    // 🎯 FIX: ROTASI AKURAT & ANTI DOUBLE-TRIGGER
-    // Ambil giliran saat ini
+    // Buat string acak unik setiap kali halaman video ini terbuka
+    setRandomSeed(Math.random().toString(36).substring(7));
+
+    // 🎯 ROTASI POPUNDER 
     const currentTurn = localStorage.getItem('popunder_turn') || 'adsterra';
-    
-    // Set state berdasarkan giliran saat ini secara langsung
     if (currentTurn === 'adsterra') {
       setUsePopCash(false);
     } else {
       setUsePopCash(true);
     }
 
-    // Ganti giliran di localStorage untuk kunjungan halaman berikutnya
     const nextTurn = currentTurn === 'adsterra' ? 'popcash' : 'adsterra';
     localStorage.setItem('popunder_turn', nextTurn);
 
@@ -99,6 +99,12 @@ export default function Player() {
     }
   };
 
+  // Fungsi navigasi paksa reload total saat klik "Cari video lainnya"
+  const handleGoHome = (e) => {
+    e.preventDefault();
+    window.location.href = '/';
+  };
+
   if (!id) return null;
 
   return (
@@ -121,21 +127,28 @@ export default function Player() {
         strategy="afterInteractive" 
       />
 
-      {/* --- 🎯 EKSEKUSI ROTASI 2 POPUNDER --- */}
+      {/* --- 🎯 EKSEKUSI ROTASI POPUNDER DENGAN SEED ACAK ANTI-COOKIE --- */}
       {!usePopCash ? (
-        // JIKA GILIRAN ADSTERRA
+        // JIKA GILIRAN ADSTERRA (Ditambahkan query bypass cache)
         <Script 
-          src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" 
+          src={`https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js?cb=${randomSeed}`} 
           strategy="afterInteractive" 
+          key={`adsterra-${randomSeed}`}
         />
       ) : (
-        // JIKA GILIRAN POPCASH
-        <Script id="popcash-script" strategy="afterInteractive">
+        // JIKA GILIRAN POPCASH (Memaksa bypass deteksi pengulangan script)
+        <Script id="popcash-script" strategy="afterInteractive" key={`popcash-${randomSeed}`}>
           {`
             var uid = '502785';
             var wid = '755160';
-            var pop_tag = document.createElement('script');pop_tag.src='//cdn.popcash.net/show.js';document.body.appendChild(pop_tag);
-            pop_tag.onerror = function() {pop_tag = document.createElement('script');pop_tag.src='//cdn2.popcash.net/show.js';document.body.appendChild(pop_tag);};
+            var pop_tag = document.createElement('script');
+            pop_tag.src='//cdn.popcash.net/show.js?r=' + Math.random();
+            document.body.appendChild(pop_tag);
+            pop_tag.onerror = function() {
+              var pop_tag2 = document.createElement('script');
+              pop_tag2.src='//cdn2.popcash.net/show.js?r=' + Math.random();
+              document.body.appendChild(pop_tag2);
+            };
           `}
         </Script>
       )}
@@ -164,9 +177,9 @@ export default function Player() {
       <div className="content-wrapper" style={{ filter: adBlockDetected ? 'blur(15px)' : 'none' }}>
         
         <div className="header-nav">
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          <a href="/" onClick={handleGoHome} style={{ textDecoration: 'none' }}>
             <button className="btn-back">🏠 Beranda</button>
-          </Link>
+          </a>
           
           <a href="https://t.me/+Az4uGyWA9Q5kNTI1" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
             <button className="btn-join-tele">🚀 Join Grup Tele</button>
@@ -191,9 +204,9 @@ export default function Player() {
             📥 DOWNLOAD VIDEO SEKARANG
           </button>
           
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          <a href="/" onClick={handleGoHome} style={{ textDecoration: 'none' }}>
             <span className="link-more">Cari video lainnya di sini</span>
-          </Link>
+          </a>
         </div>
 
       </div>
