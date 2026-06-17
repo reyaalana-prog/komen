@@ -38,7 +38,7 @@ export default function Player() {
       setShowAgeVerif(false);
     }
 
-    // 1. DETEKES ADBLOCK
+    // 1. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
       const googleAdUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
       try {
@@ -137,40 +137,44 @@ export default function Player() {
           min-height: 100vh;
           overflow-x: hidden;
         }
+        /* Fix Box Sizing Global khusus Modal */
+        .age-verif-modal * {
+          box-sizing: border-box !important;
+        }
       `}</style>
 
       {/* --- 🎯 IKLAN UTAMA ADSTERRA --- */}
       <Script src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" strategy="afterInteractive" />
       <Script src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" strategy="afterInteractive" />
 
-      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (PENGURUK CUAN) --- */}
+      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR MOBILE FRIENDLY --- */}
       {showAgeVerif && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.95)', zIndex: 99999,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          padding: '20px', textAlign: 'center', backdropFilter: 'blur(5px)'
+        <div className="age-verif-modal" style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.96)', zIndex: 99999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '15px', textAlign: 'center', backdropFilter: 'blur(5px)'
         }}>
           <div style={{
-            backgroundColor: '#111', padding: '30px', borderRadius: '15px',
-            border: '2px solid #ff0055', maxWidth: '450px', width: '100%',
-            boxShadow: '0 0 30px rgba(255, 0, 85, 0.4)'
+            backgroundColor: '#111', padding: '25px 20px', borderRadius: '15px',
+            border: '2px solid #ff0055', maxWidth: '400px', width: '100%',
+            boxShadow: '0 0 25px rgba(255, 0, 85, 0.4)'
           }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '15px' }}>🔞</div>
-            <h2 style={{ fontFamily: 'sans-serif', margin: '0 0 10px 0', fontSize: '1.6rem', color: '#fff' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🔞</div>
+            <h2 style={{ fontFamily: 'sans-serif', margin: '0 0 10px 0', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>
               KONFIRMASI USIA KAMU
             </h2>
-            <p style={{ color: '#bbb', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '25px' }}>
+            <p style={{ color: '#bbb', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '20px', padding: '0 5px' }}>
               Konten di dalam website ini dikhususkan bagi pengguna yang sudah dewasa. Apakah kamu berusia <b>18 tahun ke atas</b>?
             </p>
             
-            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', width: '100%' }}>
               <button 
                 onClick={handleAgeVerify}
                 style={{
-                  padding: '12px 35px', backgroundColor: '#ff0055', color: '#fff',
-                  border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem',
-                  cursor: 'pointer', transition: '0.2s', width: '50%'
+                  padding: '14px 0', backgroundColor: '#ff0055', color: '#fff',
+                  border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem',
+                  cursor: 'pointer', width: '50%', display: 'block'
                 }}
               >
                 YA (18+)
@@ -178,9 +182,9 @@ export default function Player() {
               <button 
                 onClick={() => window.location.href = 'https://google.com'}
                 style={{
-                  padding: '12px 25px', backgroundColor: '#333', color: '#aaa',
-                  border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem',
-                  cursor: 'pointer', width: '50%'
+                  padding: '14px 0', backgroundColor: '#222', color: '#aaa',
+                  border: '1px solid #444', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem',
+                  cursor: 'pointer', width: '50%', display: 'block'
                 }}
               >
                 TIDAK
@@ -192,7 +196,7 @@ export default function Player() {
 
       {adBlockDetected && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
           backgroundColor: 'rgba(0,0,0,0.98)', zIndex: 9999,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           padding: '20px', textAlign: 'center'
@@ -262,6 +266,13 @@ export default function Player() {
         .btn-download { padding: 18px 40px; font-size: 1.1rem; background-color: #28a745; color: #fff; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; max-width: 400px; box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4); transition: 0.3s; }
         .btn-download:hover { transform: scale(1.05); background-color: #218838; }
         .link-more { display: block; margin-top: 20px; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.9rem; }
+        
+        /* Tambahan Media Query biar makin cakep di HP Kecil */
+        @media (max-width: 480px) {
+          .content-wrapper { padding: 10px; }
+          .btn-download { font-size: 0.95rem; padding: 15px 20px; }
+          .btn-back, .btn-join-tele { font-size: 0.85rem; padding: 8px 12px; }
+        }
       `}</style>
     </div>
   );
