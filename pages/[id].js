@@ -8,7 +8,6 @@ export default function Player() {
   const router = useRouter();
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
-  const [usePopCash, setUsePopCash] = useState(false);
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
   let id = rawId;
@@ -18,18 +17,6 @@ export default function Player() {
 
   useEffect(() => {
     if (!id) return;
-
-    // 🎯 ROTASI 50:50 MUTLAK (Anti Bentrokan Skrip)
-    const currentTurn = localStorage.getItem('popunder_turn') || 'adsterra';
-    
-    if (currentTurn === 'adsterra') {
-      setUsePopCash(false);
-    } else {
-      setUsePopCash(true);
-    }
-
-    const nextTurn = currentTurn === 'adsterra' ? 'popcash' : 'adsterra';
-    localStorage.setItem('popunder_turn', nextTurn);
 
     // 1. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
@@ -116,36 +103,17 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🎯 EKSEKUSI JALUR ROTASI MANDIRI & STERIL --- */}
-      {!usePopCash ? (
-        // JIKA GILIRAN ADSTERRA (Social Bar + Popunder Ikut Serta)
-        <>
-          <Script 
-            src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" 
-            strategy="afterInteractive" 
-          />
-          <Script 
-            src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" 
-            strategy="afterInteractive" 
-          />
-        </>
-      ) : (
-        // JIKA GILIRAN POPCASH (Murni PopCash Sendiri, Bebas Gangguan Kunci DOM Adsterra)
-        <Script id="popcash-script" strategy="afterInteractive">
-          {`
-            var uid = '502785';
-            var wid = '755160';
-            var pop_tag = document.createElement('script');
-            pop_tag.src='//cdn.popcash.net/show.js';
-            document.body.appendChild(pop_tag);
-            pop_tag.onerror = function() {
-              var pop_tag2 = document.createElement('script');
-              pop_tag2.src='//cdn2.popcash.net/show.js';
-              document.body.appendChild(pop_tag2);
-            };
-          `}
-        </Script>
-      )}
+      {/* --- 🎯 IKLAN MELAYANG SOCIAL BAR ADSTERRA (Selalu Muncul) --- */}
+      <Script 
+        src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" 
+        strategy="afterInteractive" 
+      />
+
+      {/* --- 🎯 IKLAN POPUNDER ADSTERRA (Murni Berjalan Sendiri Tanpa Saingan) --- */}
+      <Script 
+        src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" 
+        strategy="afterInteractive" 
+      />
 
       {adBlockDetected && (
         <div style={{
