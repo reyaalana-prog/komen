@@ -250,7 +250,7 @@ export default function Player() {
             onTimeUpdate={handleTimeUpdate} // 🎯 Pemicu tracking detik video gess
             controls 
             controlsList="nodownload" 
-            autoPlay // Diaktifkan kembali biar pas penonton masuk langsung jalan lancar
+            // autoPlay DIHAPUS BIAR PENONTON KLIK MANUAL & SUARA LANGSUNG AKTIF NORMAL
             preload="metadata"
             playsInline
             key={id}
