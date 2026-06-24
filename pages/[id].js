@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import Link from 'next/link';
 
@@ -9,6 +9,8 @@ export default function Player() {
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
   const [showAgeVerif, setShowAgeVerif] = useState(false);
+  const videoRef = useRef(null);
+  const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali selama video diputar
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
   let id = rawId;
@@ -18,25 +20,6 @@ export default function Player() {
 
   useEffect(() => {
     if (!id) return;
-
-    // 🎯 KONTROL LIMIT VERIFIKASI UMUR (Maksimal 2x Sehari)
-    const todayStr = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
-    const savedDate = localStorage.getItem('verif_date');
-    let verifCount = parseInt(localStorage.getItem('verif_count') || '0');
-
-    // Jika hari sudah berganti, reset hitungan klik
-    if (savedDate !== todayStr) {
-      localStorage.setItem('verif_date', todayStr);
-      localStorage.setItem('verif_count', '0');
-      verifCount = 0;
-    }
-
-    // Jika belum mencapai batas limit 2 kali, tampilkan pop-up verifikasi
-    if (verifCount < 2) {
-      setShowAgeVerif(true);
-    } else {
-      setShowAgeVerif(false);
-    }
 
     // 1. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
@@ -82,20 +65,55 @@ export default function Player() {
     };
   }, [id]);
 
-  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Buka Direct Link + Sembunyikan Pop-up)
+  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-10)
+  const handleTimeUpdate = () => {
+    if (hasTriggeredVerif.current || !videoRef.current) return;
+
+    // Ambil waktu berjalan video saat ini
+    const currentTime = videoRef.current.currentTime;
+
+    // Begitu menyentuh atau melewati 10 detik, kunci dan munculkan modal verifikasi
+    if (currentTime >= 10) {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const savedDate = localStorage.getItem('verif_date');
+      const verifCount = parseInt(localStorage.getItem('verif_count') || '0');
+
+      // Tetap patuhi limit harian maksimal 2x sehari seperti aturan kodingan awal kamu
+      if (savedDate === todayStr && verifCount >= 2) {
+        hasTriggeredVerif.current = true;
+        return;
+      }
+
+      // Hentikan video paksa di detik ke-10 gess!
+      videoRef.current.pause();
+      setShowAgeVerif(true);
+    }
+  };
+
+  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Buka Direct Link + Tutup Modal + Lanjutkan Video)
   const handleAgeVerify = () => {
     const linkAdsteraDirect = 'https://researchingsweatexit.com/qbd728qj?key=843109ad1c064b8f2240ccaa317b3e02';
     
-    // Update total hitungan klik verifikasi di memori browser
+    const todayStr = new Date().toISOString().slice(0, 10);
     let verifCount = parseInt(localStorage.getItem('verif_count') || '0');
+    
+    if (localStorage.getItem('verif_date') !== todayStr) {
+      localStorage.setItem('verif_date', todayStr);
+      verifCount = 0;
+    }
+
     verifCount++;
     localStorage.setItem('verif_count', verifCount.toString());
+    hasTriggeredVerif.current = true; // Tandai sukses lolos verifikasi
 
-    // Buka iklan direct link di tab baru
+    // Tembakkan Direct Link utama ke tab baru browser gess!
     window.open(linkAdsteraDirect, '_blank');
-    
-    // Tutup pop-up verifikasi agar video player bisa diakses
     setShowAgeVerif(false);
+
+    // Lanjutkan putar video otomatis tanpa perlu klik play lagi
+    setTimeout(() => {
+      if (videoRef.current) videoRef.current.play().catch(() => {});
+    }, 500);
   };
 
   const handleDownload = () => {
@@ -137,7 +155,6 @@ export default function Player() {
           min-height: 100vh;
           overflow-x: hidden;
         }
-        /* Fix Box Sizing Global khusus Modal */
         .age-verif-modal * {
           box-sizing: border-box !important;
         }
@@ -147,7 +164,7 @@ export default function Player() {
       <Script src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" strategy="afterInteractive" />
       <Script src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" strategy="afterInteractive" />
 
-      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR MOBILE FRIENDLY --- */}
+      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR YANG MUNCUL DI DETIK KE-10 --- */}
       {showAgeVerif && (
         <div className="age-verif-modal" style={{
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
@@ -215,7 +232,7 @@ export default function Player() {
         </div>
       )}
 
-      <div className="content-wrapper" style={{ filter: (adBlockDetected || showAgeVerif) ? 'blur(15px)' : 'none' }}>
+      <div className="content-wrapper" style={{ filter: adBlockDetected ? 'blur(15px)' : 'none' }}>
         
         <div className="header-nav">
           <a href="/" onClick={handleGoHome} style={{ textDecoration: 'none' }}>
@@ -229,9 +246,11 @@ export default function Player() {
 
         <div className="video-container">
           <video 
+            ref={videoRef}
+            onTimeUpdate={handleTimeUpdate} // 🎯 Pemicu tracking detik video gess
             controls 
             controlsList="nodownload" 
-            autoPlay 
+            autoPlay // Diaktifkan kembali biar pas penonton masuk langsung jalan lancar
             preload="metadata"
             playsInline
             key={id}
@@ -261,13 +280,12 @@ export default function Player() {
         .btn-join-tele { background-color: #0088cc; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3); transition: 0.3s; }
         .btn-join-tele:hover { background-color: #0077b5; transform: translateY(-1px); }
         .video-container { width: 100%; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(255, 0, 0, 0.1); line-height: 0; }
-        video { width: 100%; height: auto; max-height: 75vh; background: #000; }
+        video { width: 100%; height: auto; max-height: 75vh; background: #000; cursor: pointer; }
         .actions { margin-top: 30px; text-align: center; width: 100%; }
         .btn-download { padding: 18px 40px; font-size: 1.1rem; background-color: #28a745; color: #fff; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; max-width: 400px; box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4); transition: 0.3s; }
         .btn-download:hover { transform: scale(1.05); background-color: #218838; }
         .link-more { display: block; margin-top: 20px; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.9rem; }
         
-        /* Tambahan Media Query biar makin cakep di HP Kecil */
         @media (max-width: 480px) {
           .content-wrapper { padding: 10px; }
           .btn-download { font-size: 0.95rem; padding: 15px 20px; }
