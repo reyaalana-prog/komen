@@ -10,7 +10,7 @@ export default function Player() {
   const [adBlockDetected, setAdBlockDetected] = useState(false);
   const [showAgeVerif, setShowAgeVerif] = useState(false);
   const videoRef = useRef(null);
-  const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali selama video diputar
+  const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
   let id = rawId;
@@ -21,7 +21,22 @@ export default function Player() {
   useEffect(() => {
     if (!id) return;
 
-    // 1. DETEKSI ADBLOCK
+    // --- 1. JINAKKAN POPUNDER (Di-delay 5 Detik baru aktif gess!) ---
+    const timerPopunder = setTimeout(() => {
+      const scriptAd = document.createElement('script');
+      scriptAd.src = "https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js";
+      scriptAd.async = true;
+      scriptAd.id = "popunder-jinak";
+      document.body.appendChild(scriptAd);
+    }, 5000); // 5000 ms = 5 Detik
+
+    // --- 2. SOCIAL BAR (Tetap Aktif Langsung) ---
+    const scriptSocialBar = document.createElement('script');
+    scriptSocialBar.src = "https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js";
+    scriptSocialBar.async = true;
+    document.body.appendChild(scriptSocialBar);
+
+    // 3. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
       const googleAdUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
       try {
@@ -33,7 +48,7 @@ export default function Player() {
     };
     checkAdBlock();
 
-    // 2. AMBIL JUDUL VIDEO DARI MULTI-TABLE
+    // 4. AMBIL JUDUL VIDEO DARI MULTI-TABLE
     const fetchVideoInfo = async () => {
       let { data } = await supabase
         .from('videos2')
@@ -62,29 +77,32 @@ export default function Player() {
 
     return () => {
       localStorage.removeItem('download_step');
+      clearTimeout(timerPopunder); // Bersihkan timer biar gak bocor memori Next.js
+      const penontonKabur = document.getElementById("popunder-jinak");
+      if (penontonKabur && document.body.contains(penontonKabur)) {
+        document.body.removeChild(penontonKabur);
+      }
     };
   }, [id]);
 
-  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-10)
+  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-15)
   const handleTimeUpdate = () => {
     if (hasTriggeredVerif.current || !videoRef.current) return;
 
-    // Ambil waktu berjalan video saat ini
     const currentTime = videoRef.current.currentTime;
 
-    // Begitu menyentuh atau melewati 10 detik, kunci dan munculkan modal verifikasi
-    if (currentTime >= 10) {
+    // Begitu menyentuh atau melewati 15 detik, langsung hadang gess!
+    if (currentTime >= 15) {
       const todayStr = new Date().toISOString().slice(0, 10);
       const savedDate = localStorage.getItem('verif_date');
       const verifCount = parseInt(localStorage.getItem('verif_count') || '0');
 
-      // Tetap patuhi limit harian maksimal 2x sehari seperti aturan kodingan awal kamu
+      // Tetap patuhi limit harian maksimal 2x sehari sesuai aturan kodingan awal kamu
       if (savedDate === todayStr && verifCount >= 2) {
         hasTriggeredVerif.current = true;
         return;
       }
 
-      // Hentikan video paksa di detik ke-10 gess!
       videoRef.current.pause();
       setShowAgeVerif(true);
     }
@@ -104,13 +122,11 @@ export default function Player() {
 
     verifCount++;
     localStorage.setItem('verif_count', verifCount.toString());
-    hasTriggeredVerif.current = true; // Tandai sukses lolos verifikasi
+    hasTriggeredVerif.current = true;
 
-    // Tembakkan Direct Link utama ke tab baru browser gess!
     window.open(linkAdsteraDirect, '_blank');
     setShowAgeVerif(false);
 
-    // Lanjutkan putar video otomatis tanpa perlu klik play lagi
     setTimeout(() => {
       if (videoRef.current) videoRef.current.play().catch(() => {});
     }, 500);
@@ -160,11 +176,7 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🎯 IKLAN UTAMA ADSTERRA --- */}
-      <Script src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" strategy="afterInteractive" />
-      <Script src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" strategy="afterInteractive" />
-
-      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR YANG MUNCUL DI DETIK KE-10 --- */}
+      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (MUNCUL DI DETIK KE-15) --- */}
       {showAgeVerif && (
         <div className="age-verif-modal" style={{
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
@@ -247,10 +259,9 @@ export default function Player() {
         <div className="video-container">
           <video 
             ref={videoRef}
-            onTimeUpdate={handleTimeUpdate} // 🎯 Pemicu tracking detik video gess
+            onTimeUpdate={handleTimeUpdate}
             controls 
             controlsList="nodownload" 
-            // autoPlay DIHAPUS BIAR PENONTON KLIK MANUAL & SUARA LANGSUNG AKTIF NORMAL
             preload="metadata"
             playsInline
             key={id}
