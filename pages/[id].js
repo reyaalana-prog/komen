@@ -11,6 +11,7 @@ export default function Player() {
   const [showAgeVerif, setShowAgeVerif] = useState(false);
   const videoRef = useRef(null);
   const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali
+  const lastCheckedTime = useRef(-1); // 🎯 PELINDUNG BIAR TIDAK RAKUS REQUEST CLOUDFLARE
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
   let id = rawId;
@@ -85,26 +86,32 @@ export default function Player() {
     };
   }, [id]);
 
-  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-15)
+  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-15 Versi Hemat Kuota)
   const handleTimeUpdate = () => {
     if (hasTriggeredVerif.current || !videoRef.current) return;
 
-    const currentTime = videoRef.current.currentTime;
+    // Bulatkan durasi jalan video saat ini agar tidak kirim puluhan request per detik
+    const currentTime = Math.floor(videoRef.current.currentTime);
 
-    // Begitu menyentuh atau melewati 15 detik, langsung hadang gess!
-    if (currentTime >= 15) {
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const savedDate = localStorage.getItem('verif_date');
-      const verifCount = parseInt(localStorage.getItem('verif_count') || '0');
+    // Jalankan logika hanya jika detiknya benar-benar berubah gess
+    if (currentTime !== lastCheckedTime.current) {
+      lastCheckedTime.current = currentTime;
 
-      // Tetap patuhi limit harian maksimal 2x sehari sesuai aturan kodingan awal kamu
-      if (savedDate === todayStr && verifCount >= 2) {
-        hasTriggeredVerif.current = true;
-        return;
+      // Begitu menyentuh atau melewati 15 detik, langsung hadang gess!
+      if (currentTime >= 15) {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const savedDate = localStorage.getItem('verif_date');
+        const verifCount = parseInt(localStorage.getItem('verif_count') || '0');
+
+        // Tetap patuhi limit harian maksimal 2x sehari sesuai aturan kodingan awal kamu
+        if (savedDate === todayStr && verifCount >= 2) {
+          hasTriggeredVerif.current = true;
+          return;
+        }
+
+        videoRef.current.pause();
+        setShowAgeVerif(true);
       }
-
-      videoRef.current.pause();
-      setShowAgeVerif(true);
     }
   };
 
