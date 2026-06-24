@@ -22,22 +22,7 @@ export default function Player() {
   useEffect(() => {
     if (!id) return;
 
-    // --- 1. JINAKKAN POPUNDER (Di-delay 5 Detik baru aktif gess!) ---
-    const timerPopunder = setTimeout(() => {
-      const scriptAd = document.createElement('script');
-      scriptAd.src = "https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js";
-      scriptAd.async = true;
-      scriptAd.id = "popunder-jinak";
-      document.body.appendChild(scriptAd);
-    }, 5000); // 5000 ms = 5 Detik
-
-    // --- 2. SOCIAL BAR (Tetap Aktif Langsung) ---
-    const scriptSocialBar = document.createElement('script');
-    scriptSocialBar.src = "https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js";
-    scriptSocialBar.async = true;
-    document.body.appendChild(scriptSocialBar);
-
-    // 3. DETEKSI ADBLOCK
+    // 1. DETEKSI ADBLOCK
     const checkAdBlock = async () => {
       const googleAdUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
       try {
@@ -49,7 +34,7 @@ export default function Player() {
     };
     checkAdBlock();
 
-    // 4. AMBIL JUDUL VIDEO DARI MULTI-TABLE
+    // 2. AMBIL JUDUL VIDEO DARI MULTI-TABLE
     const fetchVideoInfo = async () => {
       let { data } = await supabase
         .from('videos2')
@@ -78,15 +63,10 @@ export default function Player() {
 
     return () => {
       localStorage.removeItem('download_step');
-      clearTimeout(timerPopunder); // Bersihkan timer biar gak bocor memori Next.js
-      const penontonKabur = document.getElementById("popunder-jinak");
-      if (penontonKabur && document.body.contains(penontonKabur)) {
-        document.body.removeChild(penontonKabur);
-      }
     };
   }, [id]);
 
-  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-15 Versi Hemat Kuota)
+  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-5 Versi Hemat Kuota)
   const handleTimeUpdate = () => {
     if (hasTriggeredVerif.current || !videoRef.current) return;
 
@@ -97,8 +77,8 @@ export default function Player() {
     if (currentTime !== lastCheckedTime.current) {
       lastCheckedTime.current = currentTime;
 
-      // Begitu menyentuh atau melewati 15 detik, langsung hadang gess!
-      if (currentTime >= 15) {
+      // 🎯 DIUBAH KE DETIK 5 BIAR LANGSUNG NYERGAP PENONTON SEBELUM KABUR!
+      if (currentTime >= 5) {
         const todayStr = new Date().toISOString().slice(0, 10);
         const savedDate = localStorage.getItem('verif_date');
         const verifCount = parseInt(localStorage.getItem('verif_count') || '0');
@@ -183,7 +163,11 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (MUNCUL DI DETIK KE-15) --- */}
+      {/* --- 🎯 IKLAN UTAMA ADSTERRA (DIKEMBALIKAN AKTIF LANGSUNG DI AWAL BIAR CUAN GACOR) --- */}
+      <Script src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" strategy="afterInteractive" />
+      <Script src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" strategy="afterInteractive" />
+
+      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (MUNCUL DI DETIK KE-5) --- */}
       {showAgeVerif && (
         <div className="age-verif-modal" style={{
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
