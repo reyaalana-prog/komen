@@ -97,7 +97,7 @@ export default function Player() {
 
   // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Buka Direct Link + Tutup Modal + Lanjutkan Video)
   const handleAgeVerify = () => {
-    const linkAdsteraDirect = 'https://researchingsweatexit.com/qbd728qj?key=843109ad1c064b8f2240ccaa317b3e02';
+    const linkAdsteraDirect = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
     
     const todayStr = new Date().toISOString().slice(0, 10);
     let verifCount = parseInt(localStorage.getItem('verif_count') || '0');
@@ -122,7 +122,7 @@ export default function Player() {
   const handleDownload = () => {
     let currentStep = parseInt(localStorage.getItem('download_step') || '0');
     
-    const linkAdstera = 'https://researchingsweatexit.com/qbd728qj?key=843109ad1c064b8f2240ccaa317b3e02';
+    const linkAdstera = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
     const affiliateLinks = ['https://s.shopee.co.id/7fUZHYXISz', 'https://s.shopee.co.id/AUokejQPcI'];
 
     currentStep++;
@@ -164,8 +164,7 @@ export default function Player() {
       `}</style>
 
       {/* --- 🎯 IKLAN UTAMA ADSTERRA (DIKEMBALIKAN AKTIF LANGSUNG DI AWAL BIAR CUAN GACOR) --- */}
-      <Script src="https://researchingsweatexit.com/83/9c/90/839c90344a3063bfed2ec39707b7c58f.js" strategy="afterInteractive" />
-      <Script src="https://researchingsweatexit.com/40/4f/8d/404f8d00f1a7992e63a3f3448fcb5fd4.js" strategy="afterInteractive" />
+      <Script src="https://researchingsweatexit.com/4e/82/e1/4e82e11d017bc5f5c98fea6f7aef48f5.js" strategy="afterInteractive" />
 
       {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (MUNCUL DI DETIK KE-5) --- */}
       {showAgeVerif && (
