@@ -14,7 +14,7 @@ export default function BulkShare() {
 
   // 🎯 TAHAP 1: AMANKAN DAFTAR DOMAIN BIAR LOLOS BUILD NEXT.JS
   const [daftarDomain, setDaftarDomain] = useState([
-    { nama: 'Domain Utama (cloudflare)', url: 'https://2dbsclbarfire.pages.dev' },
+    { nama: 'Domain Utama ', url: 'https://vidco.site' },
     { nama: 'slicednive.site', url: 'https://slicednive.site' },
     { nama: 'videiy.biz.id', url: 'https://videiy.biz.id' },
     { nama: 'cdn2.videiy.biz.id', url: 'https://cdn2.videiy.biz.id' },
@@ -25,7 +25,7 @@ export default function BulkShare() {
     // 🎯 TAHAP 2: SETELAH BROWSER SIAP, BARU ISI WINDOW.LOCATION.ORIGIN
     if (typeof window !== 'undefined') {
       const domainRealTime = [
-        { nama: 'Domain Utama (cloudflare)', url: 'https://2dbsclbarfire.pages.dev' },
+        { nama: 'Domain Utama ', url: 'vidco.site' },
         { nama: 'slicednive.site', url: 'https://slicednive.site' },
         { nama: 'videiy.biz.id', url: 'https://videiy.biz.id' },
         { nama: 'cdn2.videiy.biz.id', url: 'https://cdn2.videiy.biz.id' },
