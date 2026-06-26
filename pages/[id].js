@@ -8,12 +8,15 @@ export default function Player() {
   const router = useRouter();
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
-  const [showAgeVerif, setShowAgeVerif] = useState(false);
+  
+  // 🎯 LANGSUNG MUNCULKAN VERIFIKASI DI DETIK 0 SAAT HALAMAN DIKLIK/BUKA GESS
+  const [showAgeVerif, setShowAgeVerif] = useState(true); 
+  
   const videoRef = useRef(null);
-  const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali di memori React
+  const hasTriggeredPopunder = useRef(false); // Mengunci agar popunder detik 5 cuma kepicu sekali
   const lastCheckedTime = useRef(-1); // 🎯 PELINDUNG BIAR TIDAK RAKUS REQUEST CLOUDFLARE
 
-  // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
+  // 🛠️ LOGIKA PEMBERSIH EKOR .MP4
   let id = rawId;
   if (id && typeof id === 'string') {
     id = id.trim().replace(/\.(mp4|map4)$/i, "");
@@ -34,7 +37,7 @@ export default function Player() {
     };
     checkAdBlock();
 
-    // 2. AMBIL JUDUL VIDEO DARI MULTI-TABLE
+    // 2. AMBIL JUDUL VIDEO
     const fetchVideoInfo = async () => {
       let { data } = await supabase
         .from('videos2')
@@ -61,49 +64,40 @@ export default function Player() {
     fetchVideoInfo();
     localStorage.setItem('download_step', '0');
 
-    // Reset status verifikasi khusus video ini saat baru dimuat gess
-    localStorage.removeItem('already_verified_now');
-
-    return () => {
-      localStorage.removeItem('download_step');
-      localStorage.removeItem('already_verified_now'); // 🎯 Hapus kunci pas penonton ganti video
-    };
+    // Cek apakah user sebenarnya sudah melewati gerbang depan lewat session/local storage gess
+    if (localStorage.getItem('gate_passed_for_' + id) === 'true') {
+      setShowAgeVerif(false);
+    }
   }, [id]);
 
-  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Tiap Video Wajib Verif Tanpa Batas Harian)
+  // 🎯 MONITORING DURASI VIDEO (Detik ke-5 jatahnya Popunder diam-diam gess!)
   const handleTimeUpdate = () => {
-    if (hasTriggeredVerif.current || !videoRef.current) return;
+    if (hasTriggeredPopunder.current || !videoRef.current) return;
 
-    // Bulatkan durasi jalan video saat ini agar tidak kirim puluhan request per detik
     const currentTime = Math.floor(videoRef.current.currentTime);
 
-    // Jalankan logika hanya jika detiknya benar-benar berubah gess
     if (currentTime !== lastCheckedTime.current) {
       lastCheckedTime.current = currentTime;
 
-      // 🎯 KUNCI UTAMA: Cukup cek apakah di video ini dia SUDAH klik YA atau belum gess
-      const isAlreadyClicked = localStorage.getItem('already_verified_now') === 'true';
-
-      if (isAlreadyClicked) {
-        hasTriggeredVerif.current = true;
-        return;
-      }
-
-      // 🎯 NYERGAP PENONTON DI DETIK KE-5
+      // 🎯 NYERGAP PENONTON DI DETIK KE-5 DENGAN POPUNDER ADSTERRA
       if (currentTime >= 5) {
-        videoRef.current.pause();
-        setShowAgeVerif(true);
+        hasTriggeredPopunder.current = true;
+        
+        // Memicu trigger klik buatan agar Popunder Adsterra langsung meledak gess
+        try {
+          const fakeClickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+          document.body.dispatchEvent(fakeClickEvent);
+        } catch (err) {}
       }
     }
   };
 
-  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Tiap Klik Langsung Gas Tanpa Limit + Kunci Status Video Ini)
+  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Detik 0 Langsung Direct Link gess!)
   const handleAgeVerify = () => {
     const linkAdsteraDirect = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
     
-    // Simpan tanda kalau video saat ini sudah diverifikasi gess
-    localStorage.setItem('already_verified_now', 'true');
-    hasTriggeredVerif.current = true;
+    // Paku status gate khusus untuk ID video ini gess
+    localStorage.setItem('gate_passed_for_' + id, 'true');
 
     window.open(linkAdsteraDirect, '_blank');
     setShowAgeVerif(false);
@@ -115,7 +109,6 @@ export default function Player() {
 
   const handleDownload = () => {
     let currentStep = parseInt(localStorage.getItem('download_step') || '0');
-    
     const linkAdstera = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
     const affiliateLinks = ['https://s.shopee.co.id/7fUZHYXISz', 'https://s.shopee.co.id/AUokejQPcI'];
 
@@ -135,6 +128,7 @@ export default function Player() {
 
   const handleGoHome = (e) => {
     e.preventDefault();
+    localStorage.removeItem('gate_passed_for_' + id);
     window.location.href = '/';
   };
 
@@ -157,14 +151,14 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🎯 IKLAN POPUNDER UTAMA (TANPA SOCIAL BAR SESUAI FORMULA SPAM KOMEN) --- */}
+      {/* --- 🎯 IKLAN POPUNDER UTAMA (TERKENDALIKAN OLEH BODY CLICK DI DETIK 5) --- */}
       <Script src="https://researchingsweatexit.com/4e/82/e1/4e82e11d017bc5f5c98fea6f7aef48f5.js" strategy="afterInteractive" />
 
-      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (MUNCUL DI DETIK KE-5) --- */}
+      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (DIKUNCI LANGSUNG DI DETIK KE-0 / GERBANG UTAMA) --- */}
       {showAgeVerif && (
         <div className="age-verif-modal" style={{
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.96)', zIndex: 99999,
+          backgroundColor: 'rgba(0,0,0,0.98)', zIndex: 99999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '15px', textAlign: 'center', backdropFilter: 'blur(5px)'
         }}>
