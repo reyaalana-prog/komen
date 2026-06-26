@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import Script from 'next/script';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import Link from 'next/link';
 
@@ -8,15 +8,8 @@ export default function Player() {
   const router = useRouter();
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
-  
-  // 🎯 LANGSUNG MUNCULKAN VERIFIKASI DI DETIK 0 SAAT HALAMAN DIKLIK/BUKA GESS
-  const [showAgeVerif, setShowAgeVerif] = useState(true); 
-  
-  const videoRef = useRef(null);
-  const hasTriggeredPopunder = useRef(false); // Mengunci agar popunder detik 5 cuma kepicu sekali
-  const lastCheckedTime = useRef(-1); // 🎯 PELINDUNG BIAR TIDAK RAKUS REQUEST CLOUDFLARE
 
-  // 🛠️ LOGIKA PEMBERSIH EKOR .MP4
+  // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Pelindung Database Supabase)
   let id = rawId;
   if (id && typeof id === 'string') {
     id = id.trim().replace(/\.(mp4|map4)$/i, "");
@@ -37,7 +30,7 @@ export default function Player() {
     };
     checkAdBlock();
 
-    // 2. AMBIL JUDUL VIDEO
+    // 2. AMBIL JUDUL VIDEO DARI MULTI-TABLE (videos2 & videos1)
     const fetchVideoInfo = async () => {
       let { data } = await supabase
         .from('videos2')
@@ -64,51 +57,16 @@ export default function Player() {
     fetchVideoInfo();
     localStorage.setItem('download_step', '0');
 
-    // Cek apakah user sebenarnya sudah melewati gerbang depan lewat session/local storage gess
-    if (localStorage.getItem('gate_passed_for_' + id) === 'true') {
-      setShowAgeVerif(false);
-    }
+    return () => {
+      localStorage.removeItem('download_step');
+    };
   }, [id]);
 
-  // 🎯 MONITORING DURASI VIDEO (Detik ke-5 jatahnya Popunder diam-diam gess!)
-  const handleTimeUpdate = () => {
-    if (hasTriggeredPopunder.current || !videoRef.current) return;
-
-    const currentTime = Math.floor(videoRef.current.currentTime);
-
-    if (currentTime !== lastCheckedTime.current) {
-      lastCheckedTime.current = currentTime;
-
-      // 🎯 NYERGAP PENONTON DI DETIK KE-5 DENGAN POPUNDER ADSTERRA
-      if (currentTime >= 5) {
-        hasTriggeredPopunder.current = true;
-        
-        // Memicu trigger klik buatan agar Popunder Adsterra langsung meledak gess
-        try {
-          const fakeClickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
-          document.body.dispatchEvent(fakeClickEvent);
-        } catch (err) {}
-      }
-    }
-  };
-
-  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Detik 0 Langsung Direct Link gess!)
-  const handleAgeVerify = () => {
-    const linkAdsteraDirect = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
-    
-    // Paku status gate khusus untuk ID video ini gess
-    localStorage.setItem('gate_passed_for_' + id, 'true');
-
-    window.open(linkAdsteraDirect, '_blank');
-    setShowAgeVerif(false);
-
-    setTimeout(() => {
-      if (videoRef.current) videoRef.current.play().catch(() => {});
-    }, 500);
-  };
-
+  // 🎯 LOGIKA KLIK DOWNLOAD COG (Direct Link Berantai)
   const handleDownload = () => {
     let currentStep = parseInt(localStorage.getItem('download_step') || '0');
+    
+    // Taruh Link Direct Link Adstera Andalanmu di sini gess ganti kalau punya yang baru
     const linkAdstera = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
     const affiliateLinks = ['https://s.shopee.co.id/7fUZHYXISz', 'https://s.shopee.co.id/AUokejQPcI'];
 
@@ -128,7 +86,6 @@ export default function Player() {
 
   const handleGoHome = (e) => {
     e.preventDefault();
-    localStorage.removeItem('gate_passed_for_' + id);
     window.location.href = '/';
   };
 
@@ -146,64 +103,21 @@ export default function Player() {
           min-height: 100vh;
           overflow-x: hidden;
         }
-        .age-verif-modal * {
-          box-sizing: border-box !important;
-        }
       `}</style>
 
-      {/* --- 🎯 IKLAN POPUNDER UTAMA (TERKENDALIKAN OLEH BODY CLICK DI DETIK 5) --- */}
+      {/* --- 🎯 BAGIAN IKLAN ADSTERRA (MURNI ATURAN AWAL BIKIN EMOSI REKENING) --- */}
+      
+      {/* 1. Script Iklan Popunder Utama (Detik 0 Langsung Siaga) */}
       <Script src="https://researchingsweatexit.com/4e/82/e1/4e82e11d017bc5f5c98fea6f7aef48f5.js" strategy="afterInteractive" />
 
-      {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (DIKUNCI LANGSUNG DI DETIK KE-0 / GERBANG UTAMA) --- */}
-      {showAgeVerif && (
-        <div className="age-verif-modal" style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.98)', zIndex: 99999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '15px', textAlign: 'center', backdropFilter: 'blur(5px)'
-        }}>
-          <div style={{
-            backgroundColor: '#111', padding: '25px 20px', borderRadius: '15px',
-            border: '2px solid #ff0055', maxWidth: '400px', width: '100%',
-            boxShadow: '0 0 25px rgba(255, 0, 85, 0.4)'
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🔞</div>
-            <h2 style={{ fontFamily: 'sans-serif', margin: '0 0 10px 0', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>
-              KONFIRMASI USIA KAMU
-            </h2>
-            <p style={{ color: '#bbb', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '20px', padding: '0 5px' }}>
-              Konten di dalam website ini dikhususkan bagi pengguna yang sudah dewasa. Apakah kamu berusia <b>18 tahun ke atas</b>?
-            </p>
-            
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', width: '100%' }}>
-              <button 
-                onClick={handleAgeVerify}
-                style={{
-                  padding: '14px 0', backgroundColor: '#ff0055', color: '#fff',
-                  border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem',
-                  cursor: 'pointer', width: '50%', display: 'block'
-                }}
-              >
-                YA (18+)
-              </button>
-              <button 
-                onClick={() => window.location.href = 'https://google.com'}
-                style={{
-                  padding: '14px 0', backgroundColor: '#222', color: '#aaa',
-                  border: '1px solid #444', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem',
-                  cursor: 'pointer', width: '50%', display: 'block'
-                }}
-              >
-                TIDAK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 2. Script Iklan Social Bar Melayang (Ladang Klik Gacor Pemancing Popunder) */}
+      <Script src="https://researchingsweatexit.com/8e/64/60/8e646065ec7e10fc2666eeffd60c799d.js" strategy="lazyOnload" />
+
+      {/* ------------------------------------------------------------- */}
 
       {adBlockDetected && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
           backgroundColor: 'rgba(0,0,0,0.98)', zIndex: 9999,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           padding: '20px', textAlign: 'center'
@@ -236,10 +150,9 @@ export default function Player() {
 
         <div className="video-container">
           <video 
-            ref={videoRef}
-            onTimeUpdate={handleTimeUpdate}
             controls 
             controlsList="nodownload" 
+            autoPlay 
             preload="metadata"
             playsInline
             key={id}
