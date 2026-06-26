@@ -10,7 +10,7 @@ export default function Player() {
   const [adBlockDetected, setAdBlockDetected] = useState(false);
   const [showAgeVerif, setShowAgeVerif] = useState(false);
   const videoRef = useRef(null);
-  const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali
+  const hasTriggeredVerif = useRef(false); // Mengunci agar verifikasi cuma muncul sekali di memori React
   const lastCheckedTime = useRef(-1); // 🎯 PELINDUNG BIAR TIDAK RAKUS REQUEST CLOUDFLARE
 
   // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 (Anti Case-Sensitive & Spasi)
@@ -61,12 +61,16 @@ export default function Player() {
     fetchVideoInfo();
     localStorage.setItem('download_step', '0');
 
+    // Reset status verifikasi khusus video ini saat baru dimuat gess
+    localStorage.removeItem('already_verified_now');
+
     return () => {
       localStorage.removeItem('download_step');
+      localStorage.removeItem('already_verified_now'); // 🎯 Hapus kunci pas penonton ganti video
     };
   }, [id]);
 
-  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Pemicu Detik ke-5 Versi Hemat Kuota)
+  // 🎯 MONITORING DURASI VIDEO SECARA REAL-TIME (Tiap Video Wajib Verif Tanpa Batas Harian)
   const handleTimeUpdate = () => {
     if (hasTriggeredVerif.current || !videoRef.current) return;
 
@@ -77,38 +81,28 @@ export default function Player() {
     if (currentTime !== lastCheckedTime.current) {
       lastCheckedTime.current = currentTime;
 
-      // 🎯 DIUBAH KE DETIK 5 BIAR LANGSUNG NYERGAP PENONTON SEBELUM KABUR!
+      // 🎯 KUNCI UTAMA: Cukup cek apakah di video ini dia SUDAH klik YA atau belum gess
+      const isAlreadyClicked = localStorage.getItem('already_verified_now') === 'true';
+
+      if (isAlreadyClicked) {
+        hasTriggeredVerif.current = true;
+        return;
+      }
+
+      // 🎯 NYERGAP PENONTON DI DETIK KE-5
       if (currentTime >= 5) {
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const savedDate = localStorage.getItem('verif_date');
-        const verifCount = parseInt(localStorage.getItem('verif_count') || '0');
-
-        // Tetap patuhi limit harian maksimal 2x sehari sesuai aturan kodingan awal kamu
-        if (savedDate === todayStr && verifCount >= 2) {
-          hasTriggeredVerif.current = true;
-          return;
-        }
-
         videoRef.current.pause();
         setShowAgeVerif(true);
       }
     }
   };
 
-  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Buka Direct Link + Tutup Modal + Lanjutkan Video)
+  // 🎯 EKSEKUSI KLIK TOMBOL "YA" (Tiap Klik Langsung Gas Tanpa Limit + Kunci Status Video Ini)
   const handleAgeVerify = () => {
     const linkAdsteraDirect = 'https://researchingsweatexit.com/mmka4vnd?key=50706ae76652378cf5e57300dcd8a6b9';
     
-    const todayStr = new Date().toISOString().slice(0, 10);
-    let verifCount = parseInt(localStorage.getItem('verif_count') || '0');
-    
-    if (localStorage.getItem('verif_date') !== todayStr) {
-      localStorage.setItem('verif_date', todayStr);
-      verifCount = 0;
-    }
-
-    verifCount++;
-    localStorage.setItem('verif_count', verifCount.toString());
+    // Simpan tanda kalau video saat ini sudah diverifikasi gess
+    localStorage.setItem('already_verified_now', 'true');
     hasTriggeredVerif.current = true;
 
     window.open(linkAdsteraDirect, '_blank');
@@ -163,7 +157,7 @@ export default function Player() {
         }
       `}</style>
 
-      {/* --- 🎯 IKLAN UTAMA ADSTERRA (DIKEMBALIKAN AKTIF LANGSUNG DI AWAL BIAR CUAN GACOR) --- */}
+      {/* --- 🎯 IKLAN POPUNDER UTAMA (TANPA SOCIAL BAR SESUAI FORMULA SPAM KOMEN) --- */}
       <Script src="https://researchingsweatexit.com/4e/82/e1/4e82e11d017bc5f5c98fea6f7aef48f5.js" strategy="afterInteractive" />
 
       {/* --- 🔞 MODAL POP-UP VERIFIKASI UMUR (MUNCUL DI DETIK KE-5) --- */}
