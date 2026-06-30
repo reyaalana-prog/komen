@@ -9,14 +9,13 @@ export default function Player() {
   const { id: rawId } = router.query; // Ambil parameter mentah dari URL
   const [adBlockDetected, setAdBlockDetected] = useState(false);
 
-  // 🛠️ LOGIKA BARU: PEMBERSIH EKOR .MP4 & TOPENG KAMUFLASE FRESH LINK GESS
+  // 🛠️ LOGIKA PEMBERSIH EKOR .MP4 & TOPENG KAMUFLASE FRESH LINK GESS
   let id = rawId;
   if (id && typeof id === 'string') {
     // 1. Bersihkan spasi dan hapus ekor .mp4/.map4
     id = id.trim().replace(/\.(mp4|map4)$/i, "");
 
     // 2. 🎯 FITUR BARU: Potong topeng acak setelah tanda hubung (-)
-    // Misal: "bpC23SoN1-_freshabc123" otomatis dipotong murni menjadi "bpC23SoN1" gess!
     if (id.includes('-')) {
       id = id.split('-')[0];
     }
@@ -67,7 +66,7 @@ export default function Player() {
     return () => {
       localStorage.removeItem('download_step');
     };
-  }, [id]);
+  }, [rawId]); // 🎯 SAKLAR UTAMA SUDAH DISUMBAT BIAR IRIT REQUEST DAN TIDAK NGE-LOOP GESS!
 
   // 🎯 LOGIKA KLIK DOWNLOAD COG (Direct Link Berantai)
   const handleDownload = () => {
